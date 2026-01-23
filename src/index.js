@@ -17,11 +17,31 @@ class AppController {
         return allProjects.findIndex(proj => proj.id === id);
     }
 
+    updateProjectName(id, newName) {
+        const allProjects = util.getFromLocalStorage(PROJECTS)
+        const projectToUpdate = allProjects[this.getProjectIndex(id)]
+        projectToUpdate.name = newName;
+        allProjects[this.getProjectIndex(id)] = projectToUpdate;
+        util.setToLocalStorage(PROJECTS, allProjects);
+    }
+
+    addToDoToProject(id, newToDo) {
+        const allProjects = util.getFromLocalStorage(PROJECTS)
+        const projectToUpdate = allProjects[this.getProjectIndex(id)]
+        projectToUpdate.toDos.push(newToDo);
+        allProjects[this.getProjectIndex(id)] = projectToUpdate;
+        util.setToLocalStorage(PROJECTS, allProjects);
+    }
+
+    deleteProject(id) {
+        const allProjects = util.getFromLocalStorage(PROJECTS)
+        allProjects.splice(this.getProjectIndex(id), 1);
+        util.setToLocalStorage(PROJECTS, allProjects);
+    }
+
     createToDo(title, description, dueDate, priority, projectId) {
         let newToDo = new ToDo(title, description, dueDate, priority);
-        let projectToUpdate = util.getFromLocalStorage(PROJECTS)[getProjectIndex(projectId)]
-        projectToUpdate.toDos.push(newToDo);
-        return this.createToDo;
+        this.addToDoToProject(projectId, newToDo);
     }
 
 }
@@ -37,5 +57,5 @@ if (!localStorage.getItem(PROJECTS)) {
     // set up default Project if it is the user's first time using the app
     util.setToLocalStorage(PROJECTS, []);
     const newProject = appController.createProject('New Project', []);
-    util.setToLocalStorage(CURRENT_PROJECT, newProject);
+    util.setToLocalStorage(CURRENT_PROJECT, newProject.id);
 }
