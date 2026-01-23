@@ -15,6 +15,15 @@ class Project {
 }
 
 const projectInterface = (() => {
+    function getProject(id) {
+        const allProjects = util.getFromLocalStorage(PROJECTS)
+        return allProjects[getProjectIndex(id)]
+    }
+
+    function getProjectIndex(id) {
+        const allProjects = util.getFromLocalStorage(PROJECTS)
+        return allProjects.findIndex(proj => proj.id === id);
+    }
     function createProject(name, toDos) {
         const newProject = new Project(name, toDos);
         const allProjects = util.getFromLocalStorage(PROJECTS)
@@ -23,30 +32,25 @@ const projectInterface = (() => {
         return newProject;
     }
 
-    function getProjectIndex(id) {
-        const allProjects = util.getFromLocalStorage(PROJECTS)
-        return allProjects.findIndex(proj => proj.id === id);
-    }
-
     function updateProjectName(id, newName) {
         const allProjects = util.getFromLocalStorage(PROJECTS)
-        const projectToUpdate = allProjects[this.getProjectIndex(id)]
+        const projectToUpdate = getProject(id);
         projectToUpdate.name = newName;
-        allProjects[this.getProjectIndex(id)] = projectToUpdate;
+        allProjects[getProjectIndex(id)] = projectToUpdate;
         util.setToLocalStorage(PROJECTS, allProjects);
     }
 
     function addToDoToProject(id, newToDo) {
         const allProjects = util.getFromLocalStorage(PROJECTS)
-        const projectToUpdate = allProjects[this.getProjectIndex(id)]
+        const projectToUpdate = getProject(id);
         projectToUpdate.toDos.push(newToDo);
-        allProjects[this.getProjectIndex(id)] = projectToUpdate;
+        allProjects[getProjectIndex(id)] = projectToUpdate;
         util.setToLocalStorage(PROJECTS, allProjects);
     }
 
     function deleteProject(id) {
         const allProjects = util.getFromLocalStorage(PROJECTS)
-        allProjects.splice(this.getProjectIndex(id), 1);
+        allProjects.splice(getProjectIndex(id), 1);
         util.setToLocalStorage(PROJECTS, allProjects);
     }
     return { createProject, updateProjectName, addToDoToProject, deleteProject };
