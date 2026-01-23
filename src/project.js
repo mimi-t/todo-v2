@@ -1,6 +1,6 @@
+import { PROJECTS } from "./constants.js"
 import * as util from './util.js';
 
-const PROJECTS = "projects";
 class Project {
     name = 'New Project';
     toDos = [];
@@ -9,13 +9,9 @@ class Project {
         this.name = name;
         this.toDos = toDos
     }
-
-    static from(json) {
-        return Object.assign(new Project(), );
-    }
 }
 
-const projectInterface = (() => {
+const ProjectInterface = (() => {
     function getProject(id) {
         const allProjects = util.getObjFromLocalStorage(PROJECTS)
         return allProjects[getProjectIndex(id)]
@@ -54,8 +50,8 @@ const projectInterface = (() => {
         allProjects.splice(getProjectIndex(id), 1);
         util.setObjToLocalStorage(PROJECTS, allProjects);
     }
-    return { createProject, updateProjectName, addToDoToProject, deleteProject };
+    return { getProject, getProjectIndex, createProject, updateProjectName, addToDoToProject, deleteProject };
 })();
 
 
-export { projectInterface };
+export { ProjectInterface };
