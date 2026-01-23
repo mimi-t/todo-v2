@@ -6,8 +6,44 @@
     <title>To Do</title>
 </head>
 <body>
+    <dialog id="project-dialog">
+        <form method="dialog" id="project-form">
+            <div class="form-field">
+                <label for="project-name">Project Name</label>
+                <input type="text" id="project-name" name="name" required>
+            </div>
+            <button class="cancel-btn">Cancel</button>
+            <button type="submit" class="confirm-btn">Add</button>
+        </form>
+    </dialog>
+    <dialog id="todo-dialog">
+        <form method="dialog" id="todo-form">
+            <div class="form-field">
+                <label for="todo-title">Title</label>
+                <input type="text" id="todo-title" name="title" required>
+            </div>
+            <div class="form-field">
+                <label for="todo-description">Description</label>
+                <textarea id="todo-description" name="description" required></textarea>
+            </div>
+            <div class="form-field">
+                <label for="todo-due-date">Due Date</label>
+                <input type="datetime-local" id="todo-due-date" name="dueDate" required>
+            </div>
+            <div class="form-field">
+                <label for="todo-priority">Priority</label>
+                <select id="todo-priority" name="priority" required>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <button class="cancel-btn">Cancel</button>
+            <button type="submit" class="confirm-btn">Add</button>
+        </form>
+    </dialog>
     <nav>
-        <ol id="project-list-container"></ol>
+        <ul id="project-list-container"></ul>
         <button id="add-project-btn">Add Project</button>
     </nav>
     <main>
