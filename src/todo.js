@@ -15,4 +15,12 @@ class ToDo {
     }
 }
 
-export { ToDo };
+const toDoInterface = (() => {
+    function createToDo(title, description, dueDate, priority, projectId) {
+        let newToDo = new ToDo(title, description, dueDate, priority);
+        projectInterface.addToDoToProject(projectId, newToDo);
+    }
+    return { createToDo };
+})();
+
+export { toDoInterface };
