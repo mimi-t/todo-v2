@@ -4,6 +4,7 @@ import { ProjectInterface } from "./project.js";
 import * as util from "./util.js";
 import './styles.css';
 import { format } from "date-fns";
+import moreIcon from "./assets/images/dots-horizontal.svg";
 
 const AppController = (() => {
     function startApp() {
@@ -75,9 +76,46 @@ const DisplayController = (() => {
     function populateNav(projects) {
         projectList.innerHTML = "";
         projects.forEach(project => {
-            const projectItem = document.createElement("li");
-            projectItem.textContent = project.name;
-            projectList.append(projectItem);
+            const projectContainer = document.createElement("div");
+            projectContainer.classList.add("project-item");
+            const projectText = document.createElement("p");
+            projectText.textContent = project.name;
+
+            const iconImage = document.createElement("svg");
+            iconImage.classList.add("project-more-icon");
+            iconImage.innerHTML = moreIcon;
+
+            const dropdownContainer = document.createElement("div");
+            dropdownContainer.classList.add("project-dropdown", "hide");
+            const editProject = document.createElement("div");
+            editProject.textContent = "Edit"
+            const deleteProject = document.createElement("div");
+            deleteProject.textContent = "Delete"
+            dropdownContainer.append(editProject, deleteProject);
+
+            iconImage.addEventListener("click", e => {
+                // close any other currently open dropdown
+                const dropdownToClose = document.querySelector(".project-dropdown:not(.hide)");
+                if (dropdownToClose) {
+                    dropdownToClose.classList.toggle("hide");
+                }
+                // open dropdown
+                dropdownContainer.classList.toggle("hide");
+                e.stopPropagation();
+            });
+
+            projectContainer.append(projectText, iconImage, dropdownContainer);
+            projectList.append(projectContainer);
+        });
+
+        // close dropdown when clicking outside
+        const projectDropdowns = document.querySelectorAll(".project-dropdown");
+        document.addEventListener('click', e => {
+            const clickedOutsideDropdown = !Array.from(projectDropdowns).some(dropdown => e.composedPath().includes(dropdown));
+            const dropdownToClose = document.querySelector(".project-dropdown:not(.hide)");
+            if (clickedOutsideDropdown && dropdownToClose) {
+                dropdownToClose.classList.toggle("hide");
+            }
         });
     }
 
@@ -118,6 +156,7 @@ const DisplayController = (() => {
         });
 
         projectDialogCancelBtn.addEventListener("click", () => {
+            projectForm.reset()
             projectDialog.close();
         });
 

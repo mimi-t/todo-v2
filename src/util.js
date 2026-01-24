@@ -10,4 +10,10 @@ function getObjFromLocalStorage(key) {
     return JSON.parse(localStorage.getItem(key));
 }
 
-export { generateId, setObjToLocalStorage, getObjFromLocalStorage };
+async function getSvg(filePath) {
+  const response = await fetch(filePath);
+  const svgText = await response.text();
+  return svgText;
+}
+
+export { generateId, setObjToLocalStorage, getObjFromLocalStorage, getSvg };
