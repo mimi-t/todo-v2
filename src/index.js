@@ -17,7 +17,8 @@ const AppController = (() => {
         }
         const projId = localStorage.getItem(CURRENT_PROJECT);
         ProjectInterface.addToDoToProject(projId, ToDoInterface.createToDo('clean dishes', 'wipe the sink after', new Date(), 'high'))
-        ProjectInterface.createProject('Another one', []);
+        const newProj = ProjectInterface.createProject('Another one', []);
+        ProjectInterface.addToDoToProject(newProj.id, ToDoInterface.createToDo('psych homework', 'read page 10-22', new Date(), 'low'))
 
         const allProjects = util.getObjFromLocalStorage(PROJECTS);
         const currentProject = ProjectInterface.getProject(localStorage.getItem(CURRENT_PROJECT));
@@ -27,6 +28,9 @@ const AppController = (() => {
     }
 
     function openProject(id) {
+        const project = ProjectInterface.getProject(id);
+        localStorage.setItem(CURRENT_PROJECT, id);
+        DisplayController.populateMain(project);
     }
 
     function addProject(name) {
@@ -41,7 +45,13 @@ const AppController = (() => {
 
     function deleteProject(id) {
         ProjectInterface.deleteProject(id);
-        // todo: if deleting current project open index 0 project
+        if (localStorage.getItem(CURRENT_PROJECT) === id) {
+            // if deleting current project open project at index 0 
+            const firstProject = util.getObjFromLocalStorage(PROJECTS)[0];
+            localStorage.setItem(CURRENT_PROJECT, firstProject.id);
+            openProject(firstProject.id);
+            DisplayController.populateMain(firstProject);
+        }
         DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
     }
     
@@ -70,7 +80,7 @@ const AppController = (() => {
     function deleteToDo(){
     }
 
-    return { startApp, addProject, changeProjectName, deleteProject, getToDo, toggleToDoComplete, updateToDo, deleteToDo };
+    return { startApp, openProject, addProject, changeProjectName, deleteProject, getToDo, toggleToDoComplete, updateToDo, deleteToDo };
 })();
 
 const DisplayController = (() => {
@@ -78,7 +88,6 @@ const DisplayController = (() => {
     const projectHeading = document.querySelector("#project-heading");
     const projectDialog = document.querySelector('#project-dialog');
     const projectDialogConfirmBtn = document.querySelector("#project-dialog .confirm-btn ");
-    const toDoList = document.querySelector("#todo-list");
     const deleteDialog = document.querySelector("#confirm-delete-dialog");
     
     function populateNav(projects) {
@@ -86,6 +95,9 @@ const DisplayController = (() => {
         projects.forEach(project => {
             const projectContainer = document.createElement("div");
             projectContainer.classList.add("project-item");
+            projectContainer.addEventListener("click", () => {
+                AppController.openProject(project.id);
+            });
 
             // Project navigation item
             const projectText = document.createElement("p");
@@ -128,7 +140,7 @@ const DisplayController = (() => {
                     deleteDialog.showModal();
                 });
             }
-            
+
             dropdownContainer.append(editProject, deleteProject);
             projectContainer.append(projectText, iconImage, dropdownContainer);
             projectList.append(projectContainer);
@@ -147,6 +159,8 @@ const DisplayController = (() => {
 
     function populateMain(project) {
         projectHeading.textContent = project.name;
+        const toDoList = document.querySelector("#todo-list");
+        toDoList.innerHTML = "";
         project.toDos.forEach(toDo => {
             const toDoDiv = document.createElement("div");
             toDoDiv.dataset.id = toDo.id;
