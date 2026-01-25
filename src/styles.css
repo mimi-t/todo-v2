@@ -59,8 +59,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .project-dropdown {
-    display: flex;
-    flex-direction: column;
+    position: absolute;
+    left: 280px;
 }
 
 .hide {

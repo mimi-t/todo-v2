@@ -34,7 +34,9 @@ const AppController = (() => {
         DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
     }
 
-    function changeProjectName(id) {
+    function changeProjectName(id, newName) {
+        ProjectInterface.updateProjectName(id, newName);
+        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
     }
 
     function deleteProject(id) {
@@ -71,6 +73,8 @@ const AppController = (() => {
 const DisplayController = (() => {
     const projectList = document.querySelector("#project-list-container");
     const projectHeading = document.querySelector("#project-heading");
+    const projectDialog = document.querySelector('#project-dialog');
+    const projectDialogConfirmBtn = document.querySelector("#project-dialog .confirm-btn ");
     const toDoList = document.querySelector("#todo-list");
     
     function populateNav(projects) {
@@ -89,8 +93,17 @@ const DisplayController = (() => {
             dropdownContainer.classList.add("project-dropdown", "hide");
             const editProject = document.createElement("div");
             editProject.textContent = "Edit"
+            editProject.addEventListener("click", e => {
+                projectDialog.dataset.id = project.id;
+                projectDialog.dataset.mode = "edit";
+                projectDialogConfirmBtn.textContent = "Update";
+                projectDialog.showModal();
+            });
             const deleteProject = document.createElement("div");
             deleteProject.textContent = "Delete"
+            deleteProject.addEventListener("click", e => {
+                // todo: open modal with confirmation message and cancel/delete buttons
+            });
             dropdownContainer.append(editProject, deleteProject);
 
             iconImage.addEventListener("click", e => {
@@ -146,12 +159,12 @@ const DisplayController = (() => {
     function setUpListeners() {
         // Project listeners
         const addProjectBtn = document.querySelector("#add-project-btn");
-        const projectDialog = document.querySelector('#project-dialog');
         const projectForm = document.querySelector("#project-form");
         const projectDialogCancelBtn = document.querySelector("#project-dialog .cancel-btn ");
-        const projectDialogConfirmBtn = document.querySelector("#project-dialog .confirm-btn ");
 
         addProjectBtn.addEventListener("click", () => {
+            projectDialog.dataset.mode = "create";
+            projectDialogConfirmBtn.textContent = "Add";
             projectDialog.showModal();
         });
 
@@ -160,9 +173,17 @@ const DisplayController = (() => {
             projectDialog.close();
         });
 
-        projectDialogConfirmBtn.addEventListener("click", e => {
+        projectForm.addEventListener("submit", e => {
             const formData = new FormData(projectForm);
-            AppController.addProject(formData.get("name".trim()));
+            const newName = formData.get("name".trim());
+            if (projectDialog.dataset.mode === "create") {
+                AppController.addProject(newName);
+            } else if (projectDialog.dataset.mode === "edit") {
+                AppController.changeProjectName(projectDialog.dataset.id, newName);
+            }
+            projectDialog.dataset.mode = "";
+            projectDialog.close();
+            projectForm.reset();
         });
 
         // To do task listeners
