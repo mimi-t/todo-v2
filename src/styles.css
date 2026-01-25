@@ -38,31 +38,35 @@ h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
 
+.delete-btn {
+  background-color: red;
+}
+
 .app-container {
-    display: grid;
-    grid-template-columns: 300px 1fr;
+  display: grid;
+  grid-template-columns: 300px 1fr;
 }
 
 #project-list-container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
 }
 
 .project-more-icon {
-    width: 1.5rem;
+  width: 1.5rem;
 }
 
 .project-dropdown {
-    position: absolute;
-    left: 280px;
+  position: absolute;
+  left: 280px;
 }
 
 .hide {
-    display: none;
+  display: none;
 }

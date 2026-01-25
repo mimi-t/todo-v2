@@ -40,6 +40,9 @@ const AppController = (() => {
     }
 
     function deleteProject(id) {
+        ProjectInterface.deleteProject(id);
+        // todo: if deleting current project open index 0 project
+        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
     }
     
     function getToDo(toDoId, projectId) {
@@ -76,36 +79,20 @@ const DisplayController = (() => {
     const projectDialog = document.querySelector('#project-dialog');
     const projectDialogConfirmBtn = document.querySelector("#project-dialog .confirm-btn ");
     const toDoList = document.querySelector("#todo-list");
+    const deleteDialog = document.querySelector("#confirm-delete-dialog");
     
     function populateNav(projects) {
         projectList.innerHTML = "";
         projects.forEach(project => {
             const projectContainer = document.createElement("div");
             projectContainer.classList.add("project-item");
+
+            // Project navigation item
             const projectText = document.createElement("p");
             projectText.textContent = project.name;
-
             const iconImage = document.createElement("svg");
             iconImage.classList.add("project-more-icon");
             iconImage.innerHTML = moreIcon;
-
-            const dropdownContainer = document.createElement("div");
-            dropdownContainer.classList.add("project-dropdown", "hide");
-            const editProject = document.createElement("div");
-            editProject.textContent = "Edit"
-            editProject.addEventListener("click", e => {
-                projectDialog.dataset.id = project.id;
-                projectDialog.dataset.mode = "edit";
-                projectDialogConfirmBtn.textContent = "Update";
-                projectDialog.showModal();
-            });
-            const deleteProject = document.createElement("div");
-            deleteProject.textContent = "Delete"
-            deleteProject.addEventListener("click", e => {
-                // todo: open modal with confirmation message and cancel/delete buttons
-            });
-            dropdownContainer.append(editProject, deleteProject);
-
             iconImage.addEventListener("click", e => {
                 // close any other currently open dropdown
                 const dropdownToClose = document.querySelector(".project-dropdown:not(.hide)");
@@ -117,6 +104,32 @@ const DisplayController = (() => {
                 e.stopPropagation();
             });
 
+            // Dropdown for editing and deleting project
+            const dropdownContainer = document.createElement("div");
+            dropdownContainer.classList.add("project-dropdown", "hide");
+
+            const editProject = document.createElement("div");
+            editProject.textContent = "Edit"
+            editProject.addEventListener("click", () => {
+                projectDialog.dataset.id = project.id;
+                projectDialog.dataset.mode = "edit";
+                projectDialogConfirmBtn.textContent = "Update";
+                projectDialog.showModal();
+            });
+
+            const deleteProject = document.createElement("div");
+            deleteProject.textContent = "Delete";
+            if (projects.length > 1) {
+                deleteProject.addEventListener("click", () => {
+                    deleteDialog.dataset.id = project.id;
+                    deleteDialog.dataset.item = "project";
+                    const dialogMessage = document.querySelector("#confirm-delete-dialog .confirmation-message");
+                    dialogMessage.textContent = `Are you sure you want to delete "${project.name}"?`;
+                    deleteDialog.showModal();
+                });
+            }
+            
+            dropdownContainer.append(editProject, deleteProject);
             projectContainer.append(projectText, iconImage, dropdownContainer);
             projectList.append(projectContainer);
         });
@@ -174,6 +187,7 @@ const DisplayController = (() => {
         });
 
         projectForm.addEventListener("submit", e => {
+            e.preventDefault();
             const formData = new FormData(projectForm);
             const newName = formData.get("name".trim());
             if (projectDialog.dataset.mode === "create") {
@@ -197,6 +211,23 @@ const DisplayController = (() => {
 
         toDoDialogCancelBtn.addEventListener("click", () => {
             toDoDialog.close();
+        });
+
+        // Other listeners
+        const deleteDialogDeleteBtn = document.querySelector("#confirm-delete-dialog .delete-btn");
+        const deleteDialogCancelBtn = document.querySelector("#confirm-delete-dialog .cancel-btn");
+        deleteDialogDeleteBtn.addEventListener("click", () => {
+            if (deleteDialog.dataset.item === "project") {
+                AppController.deleteProject(deleteDialog.dataset.id);
+            } else if (deleteDialog.dataset.item === "todo") {
+                // AppController.deleteToDo(deleteDialog.dataset.id)
+            }
+            deleteDialog.dataset.item = "";
+            deleteDialog.close();
+        });
+
+        deleteDialogCancelBtn.addEventListener("click", () => {
+            deleteDialog.close();
         });
     }
 
