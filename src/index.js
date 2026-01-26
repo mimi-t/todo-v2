@@ -41,6 +41,7 @@ const AppController = (() => {
     function changeProjectName(id, newName) {
         ProjectInterface.updateProjectName(id, newName);
         DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
+        DisplayController.populateHeading(newName);
     }
 
     function deleteProject(id) {
@@ -106,6 +107,7 @@ const DisplayController = (() => {
             iconImage.classList.add("project-more-icon");
             iconImage.innerHTML = moreIcon;
             iconImage.addEventListener("click", e => {
+                e.stopPropagation();
                 // close any other currently open dropdown
                 const dropdownToClose = document.querySelector(".project-dropdown:not(.hide)");
                 if (dropdownToClose) {
@@ -113,7 +115,6 @@ const DisplayController = (() => {
                 }
                 // open dropdown
                 dropdownContainer.classList.toggle("hide");
-                e.stopPropagation();
             });
 
             // Dropdown for editing and deleting project
@@ -122,7 +123,8 @@ const DisplayController = (() => {
 
             const editProject = document.createElement("div");
             editProject.textContent = "Edit"
-            editProject.addEventListener("click", () => {
+            editProject.addEventListener("click", e => {
+                e.stopPropagation();
                 projectDialog.dataset.id = project.id;
                 projectDialog.dataset.mode = "edit";
                 projectDialogConfirmBtn.textContent = "Update";
@@ -131,17 +133,21 @@ const DisplayController = (() => {
 
             const deleteProject = document.createElement("div");
             deleteProject.textContent = "Delete";
+            deleteProject.addEventListener("click", e => {
+                e.stopPropagation();
+                deleteDialog.dataset.id = project.id;
+                deleteDialog.dataset.item = "project";
+                const dialogMessage = document.querySelector("#confirm-delete-dialog .confirmation-message");
+                dialogMessage.textContent = `Are you sure you want to delete "${project.name}"?`;
+                deleteDialog.showModal();
+            });
+
             if (projects.length > 1) {
-                deleteProject.addEventListener("click", () => {
-                    deleteDialog.dataset.id = project.id;
-                    deleteDialog.dataset.item = "project";
-                    const dialogMessage = document.querySelector("#confirm-delete-dialog .confirmation-message");
-                    dialogMessage.textContent = `Are you sure you want to delete "${project.name}"?`;
-                    deleteDialog.showModal();
-                });
+                dropdownContainer.append(editProject, deleteProject);
+            } else {
+                dropdownContainer.append(editProject);
             }
 
-            dropdownContainer.append(editProject, deleteProject);
             projectContainer.append(projectText, iconImage, dropdownContainer);
             projectList.append(projectContainer);
         });
@@ -157,8 +163,12 @@ const DisplayController = (() => {
         });
     }
 
+    function populateHeading(heading) {
+        projectHeading.textContent = heading;
+    }
+
     function populateMain(project) {
-        projectHeading.textContent = project.name;
+        populateHeading(project.name);
         const toDoList = document.querySelector("#todo-list");
         toDoList.innerHTML = "";
         project.toDos.forEach(toDo => {
@@ -245,7 +255,7 @@ const DisplayController = (() => {
         });
     }
 
-    return { populateNav, populateMain, setUpListeners };
+    return { populateNav, populateHeading, populateMain, setUpListeners };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
