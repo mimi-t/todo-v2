@@ -83,9 +83,23 @@ const AppController = (() => {
         DisplayController.swapToDoView("list");
     }
 
-    function updateToDo(){
+    function updateToDo(toDoData){
+        const formattedData = formatFormData(toDoData);
+        const updatedProject = ProjectInterface.updateToDoInProject(formattedData, localStorage.getItem(CURRENT_PROJECT));
+        DisplayController.populateToDoListView(updatedProject);
+        DisplayController.swapToDoView("list");
     }
 
+    function formatFormData(formData) {
+        const obj = Object.fromEntries(formData.entries());
+        if (formData.get("completed")) {
+            obj.completed = true;
+        } else {
+            obj.completed = false;
+        }
+        return obj;
+    }
+    
     function deleteToDo(){
     }
 
@@ -287,7 +301,7 @@ const DisplayController = (() => {
             if (toDoForm.dataset.mode === "create") {
                 AppController.addToDo(formData);
             } else if (toDoForm.dataset.mode === "edit") {
-                // AppController.updateToDo(formData);
+                AppController.updateToDo(formData);
             }
             toDoForm.dataset.mode = "";
             swapToDoView("list");
