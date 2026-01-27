@@ -23,14 +23,14 @@ const AppController = (() => {
         const allProjects = util.getObjFromLocalStorage(PROJECTS);
         const currentProject = ProjectInterface.getProject(localStorage.getItem(CURRENT_PROJECT));
         DisplayController.populateNav(allProjects);
-        DisplayController.populateMain(currentProject);
+        DisplayController.populateToDoListView(currentProject);
         DisplayController.setUpListeners();
     }
 
     function openProject(id) {
         const project = ProjectInterface.getProject(id);
         localStorage.setItem(CURRENT_PROJECT, id);
-        DisplayController.populateMain(project);
+        DisplayController.populateToDoListView(project);
     }
 
     function addProject(name) {
@@ -51,12 +51,15 @@ const AppController = (() => {
             const firstProject = util.getObjFromLocalStorage(PROJECTS)[0];
             localStorage.setItem(CURRENT_PROJECT, firstProject.id);
             openProject(firstProject.id);
-            DisplayController.populateMain(firstProject);
+            DisplayController.populateToDoListView(firstProject);
         }
         DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
     }
     
-    function getToDo(toDoId, projectId) {
+    function openToDo(toDoId) {
+        const toDoToOpen = ProjectInterface.getToDoInProject(toDoId, localStorage.getItem(CURRENT_PROJECT));
+        DisplayController.populateToDoFormView(toDoToOpen);
+        DisplayController.swapToDoView("form")
     }
 
     function toggleToDoComplete(toDoId) {
@@ -81,7 +84,7 @@ const AppController = (() => {
     function deleteToDo(){
     }
 
-    return { startApp, openProject, addProject, changeProjectName, deleteProject, getToDo, toggleToDoComplete, updateToDo, deleteToDo };
+    return { startApp, openProject, addProject, changeProjectName, deleteProject, openToDo, toggleToDoComplete, updateToDo, deleteToDo };
 })();
 
 const DisplayController = (() => {
@@ -89,6 +92,9 @@ const DisplayController = (() => {
     const projectHeading = document.querySelector("#project-heading");
     const projectDialog = document.querySelector('#project-dialog');
     const projectDialogConfirmBtn = document.querySelector("#project-dialog .confirm-btn ");
+    const toDoListView = document.querySelector('#todo-list-view');
+    const toDoFormView = document.querySelector('#todo-form-view');
+    const toDoForm = document.forms["todo-form"];
     const deleteDialog = document.querySelector("#confirm-delete-dialog");
     
     function populateNav(projects) {
@@ -100,7 +106,7 @@ const DisplayController = (() => {
                 AppController.openProject(project.id);
             });
 
-            // Project navigation item
+            // Project navigation item - name and more icon
             const projectText = document.createElement("p");
             projectText.textContent = project.name;
             const iconImage = document.createElement("svg");
@@ -117,7 +123,7 @@ const DisplayController = (() => {
                 dropdownContainer.classList.toggle("hide");
             });
 
-            // Dropdown for editing and deleting project
+            // Dropdown for edit and delete project options
             const dropdownContainer = document.createElement("div");
             dropdownContainer.classList.add("project-dropdown", "hide");
 
@@ -167,12 +173,13 @@ const DisplayController = (() => {
         projectHeading.textContent = heading;
     }
 
-    function populateMain(project) {
+    function populateToDoListView(project) {
         populateHeading(project.name);
         const toDoList = document.querySelector("#todo-list");
         toDoList.innerHTML = "";
         project.toDos.forEach(toDo => {
             const toDoDiv = document.createElement("div");
+            toDoDiv.classList.add("todo-item");
             toDoDiv.dataset.id = toDo.id;
 
             const toDoCheckbox = document.createElement("input");
@@ -184,19 +191,54 @@ const DisplayController = (() => {
             
             const toDoTitle = document.createElement("p");
             toDoTitle.textContent = toDo.title;
-            
             const toDoDate = document.createElement("p");
             toDoDate.textContent = format(toDo.dueDate, "Pp");
-            
-            toDoDiv.append(toDoCheckbox, toDoTitle, toDoDate);
+            const toDoDetailsDiv = document.createElement("div");
+            toDoDetailsDiv.classList.add("todo-item-details");
+            toDoDetailsDiv.append(toDoTitle, toDoDate);
+            toDoDetailsDiv.addEventListener("click", e => {
+                toDoForm.dataset.mode = "edit";
+                AppController.openToDo(toDo.id);
+            });
+
+            toDoDiv.append(toDoCheckbox, toDoDetailsDiv);
             toDoList.append(toDoDiv);
         });
+    }
+
+    function populateToDoFormView(toDo) {
+        // reset form and hide checkbox for completed status if creating a new to do task
+        toDoForm.reset();
+        const completedInputType = toDoForm.dataset.mode === "create" ? "hidden" : "checkbox";
+        document.forms["todo-form"].elements.namedItem("completed").setAttribute("type", completedInputType)
+        fillForm("todo-form", toDo);
+    }
+
+    function fillForm(formName, formData) {
+        const formInputs = document.forms[formName].elements;
+        for (const field in formData) {
+            let inputValue = formData[field];
+            if (field.toUpperCase().includes("DATE")) {
+                inputValue = formData[field].slice(0,16);
+            } 
+            formInputs.namedItem(field).value = inputValue;
+        }
+    }
+
+    function swapToDoView(view) {
+        if (view === "list") {
+            toDoListView.classList.remove("hide");
+            toDoFormView.classList.add("hide");
+        } else if (view === "form") {
+            toDoFormView.classList.remove("hide");
+            toDoListView.classList.add("hide");
+        }
     }
 
     function setUpListeners() {
         // Project listeners
         const addProjectBtn = document.querySelector("#add-project-btn");
-        const projectForm = document.querySelector("#project-form");
+        const projectForm = document.forms["project-form"];
         const projectDialogCancelBtn = document.querySelector("#project-dialog .cancel-btn ");
 
         addProjectBtn.addEventListener("click", () => {
@@ -226,15 +268,17 @@ const DisplayController = (() => {
 
         // To do task listeners
         const addToDoBtn = document.querySelector("#add-todo-btn");
-        const toDoDialog = document.querySelector('#todo-dialog');
-        const toDoDialogCancelBtn = document.querySelector("#todo-dialog .cancel-btn ");
+        const cancelToDoFormBtn = document.querySelector("#todo-form-view .cancel-btn ");
 
         addToDoBtn.addEventListener("click", () => {
-            toDoDialog.showModal();
+            toDoForm.dataset.mode = "create";
+            populateToDoFormView({});
+            swapToDoView("form");
         });
 
-        toDoDialogCancelBtn.addEventListener("click", () => {
-            toDoDialog.close();
+        cancelToDoFormBtn.addEventListener("click", () => {
+            swapToDoView("list");
+            toDoForm.reset();
         });
 
         // Other listeners
@@ -255,7 +299,7 @@ const DisplayController = (() => {
         });
     }
 
-    return { populateNav, populateHeading, populateMain, setUpListeners };
+    return { populateNav, populateHeading, populateToDoListView, populateToDoFormView, swapToDoView, setUpListeners };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {

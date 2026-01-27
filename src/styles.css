@@ -38,6 +38,10 @@ h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
 
+nav {
+  padding: 0.5rem 1rem;
+}
+
 .delete-btn {
   background-color: red;
 }
@@ -45,6 +49,10 @@ h1, h2, h3, h4, h5, h6 {
 .app-container {
   display: grid;
   grid-template-columns: 300px 1fr;
+}
+
+main {
+  padding: 0.5rem 1rem;
 }
 
 #project-list-container {
@@ -56,15 +64,37 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   justify-content: space-between;
   padding: 0.5rem;
+  cursor: pointer;
 }
 
 .project-more-icon {
   width: 1.5rem;
+  fill: gray;
+}
+
+.project-more-icon:hover {
+  fill: black;
 }
 
 .project-dropdown {
   position: absolute;
   left: 280px;
+  width: 6rem;
+  background-color: white;
+  padding: 0.5rem 1rem;
+  box-shadow: 0px 0 0.4rem 0.1rem grey;
+  border-radius: 0.2rem;
+}
+
+.todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.todo-item-details {
+  width: 100%;
 }
 
 .hide {

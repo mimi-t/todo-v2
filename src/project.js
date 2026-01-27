@@ -7,30 +7,30 @@ class Project {
     constructor(name, toDos) {
         this.id = util.generateId();
         this.name = name;
-        this.toDos = toDos
+        this.toDos = toDos;
     }
 }
 
 const ProjectInterface = (() => {
     function getProject(id) {
-        const allProjects = util.getObjFromLocalStorage(PROJECTS)
-        return allProjects[getProjectIndex(id)]
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
+        return allProjects[getProjectIndex(id)];
     }
 
     function getProjectIndex(id) {
-        const allProjects = util.getObjFromLocalStorage(PROJECTS)
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
         return allProjects.findIndex(proj => proj.id === id);
     }
     function createProject(name, toDos) {
         const newProject = new Project(name, toDos);
-        const allProjects = util.getObjFromLocalStorage(PROJECTS)
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
         allProjects.push(newProject);
         util.setObjToLocalStorage(PROJECTS, allProjects);
         return newProject;
     }
 
     function updateProjectName(id, newName) {
-        const allProjects = util.getObjFromLocalStorage(PROJECTS)
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
         const projectToUpdate = getProject(id);
         projectToUpdate.name = newName;
         allProjects[getProjectIndex(id)] = projectToUpdate;
@@ -38,7 +38,7 @@ const ProjectInterface = (() => {
     }
 
     function addToDoToProject(id, newToDo) {
-        const allProjects = util.getObjFromLocalStorage(PROJECTS)
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
         const projectToUpdate = getProject(id);
         projectToUpdate.toDos.push(newToDo);
         allProjects[getProjectIndex(id)] = projectToUpdate;
@@ -46,11 +46,17 @@ const ProjectInterface = (() => {
     }
 
     function deleteProject(id) {
-        const allProjects = util.getObjFromLocalStorage(PROJECTS)
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
         allProjects.splice(getProjectIndex(id), 1);
         util.setObjToLocalStorage(PROJECTS, allProjects);
     }
-    return { getProject, getProjectIndex, createProject, updateProjectName, addToDoToProject, deleteProject };
+
+    function getToDoInProject(toDoId, projId) {
+        const project = getProject(projId);
+        return project.toDos.find(todo => todo.id === toDoId);
+    }
+    
+    return { getProject, getProjectIndex, createProject, updateProjectName, addToDoToProject, deleteProject, getToDoInProject };
 })();
 
 
