@@ -1,4 +1,5 @@
-import { PROJECTS } from "./constants.js"
+import { PROJECTS } from "./constants.js";
+import { ToDoInterface } from "./todo.js";
 import * as util from './util.js';
 
 class Project {
@@ -37,14 +38,6 @@ const ProjectInterface = (() => {
         util.setObjToLocalStorage(PROJECTS, allProjects);
     }
 
-    function addToDoToProject(id, newToDo) {
-        const allProjects = util.getObjFromLocalStorage(PROJECTS);
-        const projectToUpdate = getProject(id);
-        projectToUpdate.toDos.push(newToDo);
-        allProjects[getProjectIndex(id)] = projectToUpdate;
-        util.setObjToLocalStorage(PROJECTS, allProjects);
-    }
-
     function deleteProject(id) {
         const allProjects = util.getObjFromLocalStorage(PROJECTS);
         allProjects.splice(getProjectIndex(id), 1);
@@ -55,6 +48,15 @@ const ProjectInterface = (() => {
         const project = getProject(projId);
         return project.toDos.find(todo => todo.id === toDoId);
     }
+
+    function addToDoToProject(toDoData, projId) {
+        const newToDo = ToDoInterface.createToDo(toDoData.get("title"), toDoData.get("description"), toDoData.get("dueDate"), toDoData.get("priority"));
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
+        const projectIndex = getProjectIndex(projId);
+        allProjects[projectIndex].toDos.push(newToDo);
+        util.setObjToLocalStorage(PROJECTS, allProjects);
+        return allProjects[projectIndex];
+    } 
     
     return { getProject, getProjectIndex, createProject, updateProjectName, addToDoToProject, deleteProject, getToDoInProject };
 })();

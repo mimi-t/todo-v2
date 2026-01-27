@@ -15,10 +15,10 @@ const AppController = (() => {
             const newProject = ProjectInterface.createProject('New Project', []);
             localStorage.setItem(CURRENT_PROJECT, newProject.id);
         }
-        const projId = localStorage.getItem(CURRENT_PROJECT);
-        ProjectInterface.addToDoToProject(projId, ToDoInterface.createToDo('clean dishes', 'wipe the sink after', new Date(), 'high'))
-        const newProj = ProjectInterface.createProject('Another one', []);
-        ProjectInterface.addToDoToProject(newProj.id, ToDoInterface.createToDo('psych homework', 'read page 10-22', new Date(), 'low'))
+        // const projId = localStorage.getItem(CURRENT_PROJECT);
+        // ProjectInterface.addToDoToProject({title: 'clean dishes', description: 'wipe the sink after', dueDate: new Date(), priority: 'high'}, projId);
+        // const newProj = ProjectInterface.createProject('Another one', []);
+        // ProjectInterface.addToDoToProject({title: 'psych homework', description: 'read page 10-22', dueDate: new Date(), priority: 'low'}, newProj.id);
 
         const allProjects = util.getObjFromLocalStorage(PROJECTS);
         const currentProject = ProjectInterface.getProject(localStorage.getItem(CURRENT_PROJECT));
@@ -66,10 +66,9 @@ const AppController = (() => {
         // toggle completed for to do item with matching id in current project
         const currentProjectId = localStorage.getItem(CURRENT_PROJECT);
         const currentProject = ProjectInterface.getProject(currentProjectId);
-        const currentToDos = currentProject.toDos
         
-        const toggleIndex = currentToDos.findIndex(item => { return item.id === toDoId});
-        const updatedToDo = ToDoInterface.toggleCompleted(currentToDos[toggleIndex]);
+        const toggleIndex = currentProject.toDos.findIndex(item => { return item.id === toDoId});
+        const updatedToDo = ToDoInterface.toggleCompleted(currentProject.toDos[toggleIndex]);
         currentProject.toDos[toggleIndex] = updatedToDo;
 
         const allProjects = util.getObjFromLocalStorage(PROJECTS);
@@ -78,13 +77,19 @@ const AppController = (() => {
         util.setObjToLocalStorage(PROJECTS, allProjects);
     }
 
+    function addToDo(toDoData) {
+        const updatedProject = ProjectInterface.addToDoToProject(toDoData, localStorage.getItem(CURRENT_PROJECT));
+        DisplayController.populateToDoListView(updatedProject);
+        DisplayController.swapToDoView("list");
+    }
+
     function updateToDo(){
     }
 
     function deleteToDo(){
     }
 
-    return { startApp, openProject, addProject, changeProjectName, deleteProject, openToDo, toggleToDoComplete, updateToDo, deleteToDo };
+    return { startApp, openProject, addProject, changeProjectName, deleteProject, openToDo, toggleToDoComplete, addToDo, updateToDo, deleteToDo };
 })();
 
 const DisplayController = (() => {
@@ -185,7 +190,7 @@ const DisplayController = (() => {
             const toDoCheckbox = document.createElement("input");
             toDoCheckbox.setAttribute("type", "checkbox");
             toDoCheckbox.checked = toDo.completed ? true : false;
-            toDoCheckbox.addEventListener("change", e => {
+            toDoCheckbox.addEventListener("change", () => {
                 AppController.toggleToDoComplete(toDo.id);
             });
             
@@ -274,6 +279,19 @@ const DisplayController = (() => {
             toDoForm.dataset.mode = "create";
             populateToDoFormView({});
             swapToDoView("form");
+        });
+
+        toDoForm.addEventListener("submit", e => {
+            e.preventDefault();
+            const formData = new FormData(toDoForm);
+            if (toDoForm.dataset.mode === "create") {
+                AppController.addToDo(formData);
+            } else if (toDoForm.dataset.mode === "edit") {
+                // AppController.updateToDo(formData);
+            }
+            toDoForm.dataset.mode = "";
+            swapToDoView("list");
+            toDoForm.reset();
         });
 
         cancelToDoFormBtn.addEventListener("click", () => {
