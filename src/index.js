@@ -8,7 +8,6 @@ import moreIcon from "./assets/images/dots-horizontal.svg";
 
 const AppController = (() => {
     function startApp() {
-        // localStorage.clear();
         if (!localStorage.getItem(PROJECTS)) {
             // set up default Project if it is the user's first time using the app
             util.setObjToLocalStorage(PROJECTS, []);
@@ -23,6 +22,7 @@ const AppController = (() => {
         DisplayController.setUpListeners();
     }
 
+    // Project functions
     function openProject(id) {
         const project = ProjectInterface.getProject(id);
         localStorage.setItem(CURRENT_PROJECT, id);
@@ -56,6 +56,7 @@ const AppController = (() => {
         DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
     }
     
+    // To Do functions
     function openToDo(toDoId) {
         const toDoToOpen = ProjectInterface.getToDoInProject(toDoId, localStorage.getItem(CURRENT_PROJECT));
         DisplayController.populateToDoFormView(toDoToOpen);
@@ -90,6 +91,12 @@ const AppController = (() => {
         DisplayController.swapToDoView("list");
     }
 
+    function deleteToDo(toDoId){
+        const updatedProject = ProjectInterface.deleteToDoInProject(toDoId, localStorage.getItem(CURRENT_PROJECT));
+        DisplayController.populateToDoListView(updatedProject);
+    }
+
+    // Other helper functions
     function formatFormData(formData) {
         const obj = Object.fromEntries(formData.entries());
         if (formData.get("completed")) {
@@ -100,9 +107,6 @@ const AppController = (() => {
         return obj;
     }
     
-    function deleteToDo(){
-    }
-
     return { startApp, openProject, addProject, changeProjectName, deleteProject, openToDo, toggleToDoComplete, addToDo, updateToDo, deleteToDo };
 })();
 
@@ -129,12 +133,12 @@ const DisplayController = (() => {
 
         dropdownParent.addEventListener("click", e => {
             e.stopPropagation();
-            // close any other currently open dropdown
+            // close any other currently open dropdowns
             const dropdownToClose = document.querySelector(".dropdown-menu:not(.hide)");
             if (dropdownToClose) {
                 dropdownToClose.classList.toggle("hide");
             }
-            // open dropdown
+            // open selected dropdown
             dropdownContainer.classList.toggle("hide");
         });
         return dropdownContainer;
@@ -177,8 +181,11 @@ const DisplayController = (() => {
                 menu.push({name: "Delete", action: deleteProject});
             } 
             const dropdown = createDropdown(iconImage, menu);
+            const dropdownContainer = document.createElement("div");
+            dropdownContainer.classList.add("dropdown-container");
+            dropdownContainer.append(dropdown, iconImage)
 
-            projectContainer.append(projectText, iconImage, dropdown);
+            projectContainer.append(projectText, dropdownContainer);
             projectList.append(projectContainer);
         });
     }
@@ -191,7 +198,8 @@ const DisplayController = (() => {
         populateHeading(project.name);
         const toDoList = document.querySelector("#todo-list");
         toDoList.innerHTML = "";
-        project.toDos.forEach(toDo => {
+        let sortedToDos = project.toDos.sort((a, b)=> { return new Date(a.dueDate) - new Date(b.dueDate) });
+        sortedToDos.forEach(toDo => {
             const toDoDiv = document.createElement("div");
             toDoDiv.classList.add("todo-item");
             toDoDiv.dataset.id = toDo.id;
@@ -206,7 +214,7 @@ const DisplayController = (() => {
             const toDoTitle = document.createElement("p");
             toDoTitle.textContent = toDo.title;
             const toDoDate = document.createElement("p");
-            toDoDate.textContent = format(toDo.dueDate, "Pp");
+            toDoDate.textContent = format(toDo.dueDate, "d LLL, p");
             const toDoDetailsDiv = document.createElement("div");
             toDoDetailsDiv.classList.add("todo-item-details");
             toDoDetailsDiv.append(toDoTitle, toDoDate);
@@ -215,7 +223,30 @@ const DisplayController = (() => {
                 AppController.openToDo(toDo.id);
             });
 
-            toDoDiv.append(toDoCheckbox, toDoDetailsDiv);
+            const iconImage = document.createElement("svg");
+            iconImage.classList.add("more-icon");
+            iconImage.innerHTML = moreIcon;
+
+            const editToDo = () => {
+                toDoForm.dataset.mode = "edit";
+                AppController.openToDo(toDo.id);
+            }
+            const deleteToDo = e => {
+                e.stopPropagation();
+                deleteDialog.dataset.id = toDo.id;
+                deleteDialog.dataset.item = "todo";
+                const dialogMessage = document.querySelector("#confirm-delete-dialog .confirmation-message");
+                dialogMessage.textContent = `Are you sure you want to delete "${toDo.title}"?`;
+                deleteDialog.showModal();
+            }
+
+            const menu = [{name: "Edit", action: editToDo}, {name: "Delete", action: deleteToDo}];
+            const dropdown = createDropdown(iconImage, menu);
+            const dropdownContainer = document.createElement("div");
+            dropdownContainer.classList.add("dropdown-container");
+            dropdownContainer.append(dropdown, iconImage)
+
+            toDoDiv.append(toDoCheckbox, toDoDetailsDiv, dropdownContainer);
             toDoList.append(toDoDiv);
         });
     }
@@ -316,7 +347,7 @@ const DisplayController = (() => {
             if (deleteDialog.dataset.item === "project") {
                 AppController.deleteProject(deleteDialog.dataset.id);
             } else if (deleteDialog.dataset.item === "todo") {
-                // AppController.deleteToDo(deleteDialog.dataset.id)
+                AppController.deleteToDo(deleteDialog.dataset.id)
             }
             deleteDialog.dataset.item = "";
             deleteDialog.close();

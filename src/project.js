@@ -67,7 +67,16 @@ const ProjectInterface = (() => {
         return allProjects[projectIndex];
     } 
     
-    return { getProject, getProjectIndex, createProject, updateProjectName, deleteProject, getToDoInProject, addToDoToProject, updateToDoInProject };
+    function deleteToDoInProject(toDoId, projId) {
+        const allProjects = util.getObjFromLocalStorage(PROJECTS);
+        const projectIndex = getProjectIndex(projId);
+        const toDoIndex = allProjects[projectIndex].toDos.findIndex(toDo => toDo.id === toDoId);
+        allProjects[projectIndex].toDos.splice(toDoIndex, 1);
+        util.setObjToLocalStorage(PROJECTS, allProjects);
+        return allProjects[projectIndex];
+
+    }
+    return { getProject, getProjectIndex, createProject, updateProjectName, deleteProject, getToDoInProject, addToDoToProject, updateToDoInProject, deleteToDoInProject };
 })();
 
 
