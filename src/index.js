@@ -38,7 +38,10 @@ const AppController = (() => {
     function changeProjectName(id, newName) {
         ProjectInterface.updateProjectName(id, newName);
         DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
-        DisplayController.populateHeading(newName);
+        if (localStorage.getItem(CURRENT_PROJECT) === id) {
+            // Update displayed heading if the project being updated is currently open
+            DisplayController.populateHeading(newName);
+        }
     }
 
     function deleteProject(id) {
@@ -113,6 +116,30 @@ const DisplayController = (() => {
     const toDoForm = document.forms["todo-form"];
     const deleteDialog = document.querySelector("#confirm-delete-dialog");
     
+    function createDropdown(dropdownParent, menu) {
+        // create dropdown menu
+        const dropdownContainer = document.createElement("div");
+        dropdownContainer.classList.add("dropdown-menu", "hide");
+        menu.forEach(menuItem => {
+            const menuItemDiv = document.createElement("div");
+            menuItemDiv.textContent = menuItem.name;
+            menuItemDiv.addEventListener("click", menuItem.action);
+            dropdownContainer.append(menuItemDiv);
+        });
+
+        dropdownParent.addEventListener("click", e => {
+            e.stopPropagation();
+            // close any other currently open dropdown
+            const dropdownToClose = document.querySelector(".dropdown-menu:not(.hide)");
+            if (dropdownToClose) {
+                dropdownToClose.classList.toggle("hide");
+            }
+            // open dropdown
+            dropdownContainer.classList.toggle("hide");
+        });
+        return dropdownContainer;
+    }
+
     function populateNav(projects) {
         projectList.innerHTML = "";
         projects.forEach(project => {
@@ -128,60 +155,31 @@ const DisplayController = (() => {
             const iconImage = document.createElement("svg");
             iconImage.classList.add("more-icon");
             iconImage.innerHTML = moreIcon;
-            iconImage.addEventListener("click", e => {
-                e.stopPropagation();
-                // close any other currently open dropdown
-                const dropdownToClose = document.querySelector(".project-dropdown:not(.hide)");
-                if (dropdownToClose) {
-                    dropdownToClose.classList.toggle("hide");
-                }
-                // open dropdown
-                dropdownContainer.classList.toggle("hide");
-            });
 
-            // Dropdown for edit and delete project options
-            const dropdownContainer = document.createElement("div");
-            dropdownContainer.classList.add("project-dropdown", "hide");
-
-            const editProject = document.createElement("div");
-            editProject.textContent = "Edit"
-            editProject.addEventListener("click", e => {
+            const editProject = e => {
                 e.stopPropagation();
                 projectDialog.dataset.id = project.id;
                 projectDialog.dataset.mode = "edit";
                 projectDialogConfirmBtn.textContent = "Update";
                 projectDialog.showModal();
-            });
+            }
+            const deleteProject = e => {
+                    e.stopPropagation();
+                    deleteDialog.dataset.id = project.id;
+                    deleteDialog.dataset.item = "project";
+                    const dialogMessage = document.querySelector("#confirm-delete-dialog .confirmation-message");
+                    dialogMessage.textContent = `Are you sure you want to delete "${project.name}"?`;
+                    deleteDialog.showModal();
+            }
 
-            const deleteProject = document.createElement("div");
-            deleteProject.textContent = "Delete";
-            deleteProject.addEventListener("click", e => {
-                e.stopPropagation();
-                deleteDialog.dataset.id = project.id;
-                deleteDialog.dataset.item = "project";
-                const dialogMessage = document.querySelector("#confirm-delete-dialog .confirmation-message");
-                dialogMessage.textContent = `Are you sure you want to delete "${project.name}"?`;
-                deleteDialog.showModal();
-            });
-
+            const menu = [{name: "Edit", action: editProject}];
             if (projects.length > 1) {
-                dropdownContainer.append(editProject, deleteProject);
-            } else {
-                dropdownContainer.append(editProject);
-            }
+                menu.push({name: "Delete", action: deleteProject});
+            } 
+            const dropdown = createDropdown(iconImage, menu);
 
-            projectContainer.append(projectText, iconImage, dropdownContainer);
+            projectContainer.append(projectText, iconImage, dropdown);
             projectList.append(projectContainer);
-        });
-
-        // close dropdown when clicking outside
-        const projectDropdowns = document.querySelectorAll(".project-dropdown");
-        document.addEventListener('click', e => {
-            const clickedOutsideDropdown = !Array.from(projectDropdowns).some(dropdown => e.composedPath().includes(dropdown));
-            const dropdownToClose = document.querySelector(".project-dropdown:not(.hide)");
-            if (clickedOutsideDropdown && dropdownToClose) {
-                dropdownToClose.classList.toggle("hide");
-            }
         });
     }
 
@@ -326,6 +324,16 @@ const DisplayController = (() => {
 
         deleteDialogCancelBtn.addEventListener("click", () => {
             deleteDialog.close();
+        });
+
+        // Close dropdowns when clicking outside
+        const projectDropdowns = document.querySelectorAll(".dropdown-menu");
+        document.addEventListener('click', e => {
+            const clickedOutsideDropdown = !Array.from(projectDropdowns).some(dropdown => e.composedPath().includes(dropdown));
+            const dropdownToClose = document.querySelector(".dropdown-menu:not(.hide)");
+            if (clickedOutsideDropdown && dropdownToClose) {
+                dropdownToClose.classList.toggle("hide");
+            }
         });
     }
 
