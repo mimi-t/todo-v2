@@ -17,7 +17,7 @@ const AppController = (() => {
 
         const allProjects = util.getObjFromLocalStorage(PROJECTS);
         const currentProject = ProjectInterface.getProject(localStorage.getItem(CURRENT_PROJECT));
-        DisplayController.populateNav(allProjects);
+        DisplayController.populateNav(allProjects, localStorage.getItem(CURRENT_PROJECT));
         DisplayController.populateToDoListView(currentProject);
         DisplayController.setUpListeners();
     }
@@ -26,18 +26,19 @@ const AppController = (() => {
     function openProject(id) {
         const project = ProjectInterface.getProject(id);
         localStorage.setItem(CURRENT_PROJECT, id);
+        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS), id);
         DisplayController.populateToDoListView(project);
         DisplayController.swapToDoView("list");
     }
 
     function addProject(name) {
         ProjectInterface.createProject(name, []);
-        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
+        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS), localStorage.getItem(CURRENT_PROJECT));
     }
 
     function changeProjectName(id, newName) {
         ProjectInterface.updateProjectName(id, newName);
-        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
+        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS), localStorage.getItem(CURRENT_PROJECT));
         if (localStorage.getItem(CURRENT_PROJECT) === id) {
             // Update displayed heading if the project being updated is currently open
             DisplayController.populateHeading(newName);
@@ -53,7 +54,7 @@ const AppController = (() => {
             openProject(firstProject.id);
             DisplayController.populateToDoListView(firstProject);
         }
-        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS));
+        DisplayController.populateNav(util.getObjFromLocalStorage(PROJECTS), localStorage.getItem(CURRENT_PROJECT));
     }
     
     // To Do functions
@@ -144,11 +145,14 @@ const DisplayController = (() => {
         return dropdownContainer;
     }
 
-    function populateNav(projects) {
+    function populateNav(projects, currentProject) {
         projectList.innerHTML = "";
         projects.forEach(project => {
             const projectContainer = document.createElement("div");
             projectContainer.classList.add("project-item");
+            if (currentProject === project.id) {
+                projectContainer.classList.add("selected");
+            }
             projectContainer.addEventListener("click", () => {
                 AppController.openProject(project.id);
             });
@@ -204,19 +208,24 @@ const DisplayController = (() => {
             toDoDiv.classList.add("todo-item");
             toDoDiv.dataset.id = toDo.id;
 
+            const checkboxDiv = document.createElement("div");
             const toDoCheckbox = document.createElement("input");
             toDoCheckbox.setAttribute("type", "checkbox");
             toDoCheckbox.checked = toDo.completed ? true : false;
             toDoCheckbox.addEventListener("change", () => {
                 AppController.toggleToDoComplete(toDo.id);
             });
-            
+            checkboxDiv.append(toDoCheckbox);
+
             const toDoTitle = document.createElement("p");
             toDoTitle.textContent = toDo.title;
             const toDoDate = document.createElement("p");
             toDoDate.textContent = format(toDo.dueDate, "d LLL, p");
             const toDoDetailsDiv = document.createElement("div");
             toDoDetailsDiv.classList.add("todo-item-details");
+            if (toDo.completed) {
+                toDoDetailsDiv.classList.add("completed");
+            }
             toDoDetailsDiv.append(toDoTitle, toDoDate);
             toDoDetailsDiv.addEventListener("click", e => {
                 toDoForm.dataset.mode = "edit";
@@ -246,7 +255,7 @@ const DisplayController = (() => {
             dropdownContainer.classList.add("dropdown-container");
             dropdownContainer.append(dropdown, iconImage)
 
-            toDoDiv.append(toDoCheckbox, toDoDetailsDiv, dropdownContainer);
+            toDoDiv.append(checkboxDiv, toDoDetailsDiv, dropdownContainer);
             toDoList.append(toDoDiv);
         });
     }

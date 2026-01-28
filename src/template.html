@@ -7,29 +7,35 @@
 </head>
 <body>
     <dialog id="confirm-delete-dialog">
-        <p class="confirmation-message">Are you sure?</p>
-        <button type="button" class="cancel-btn">Cancel</button>
-        <button type="submit" class="delete-btn">Delete</button>
+        <div class="confirmation-dialog">
+            <p class="confirmation-message">Are you sure?</p>
+            <div class="button-container">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" class="delete-btn">Delete</button>
+            </div>
+        </div>
     </dialog>
-    <dialog id="project-dialog">
+    <dialog id="project-dialog" class="form-dialog">
         <form method="dialog" id="project-form" name="project-form">
             <div class="form-field">
                 <label for="project-name">Project Name</label>
                 <input type="text" id="project-name" name="name" required>
             </div>
-            <button type="button" class="cancel-btn">Cancel</button>
-            <button type="submit" class="confirm-btn">Submit</button>
+            <div class="button-container">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" class="confirm-btn">Submit</button>
+            </div>
         </form>
     </dialog>
     <div class="app-container">
         <nav>
             <div id="project-list-container"></div>
-            <button id="add-project-btn">Add Project</button>
+            <button id="add-project-btn">+ Add Project</button>
         </nav>
         <main>
             <div id="todo-list-view">
                 <h1 id="project-heading"></h1>
-                <button id="add-todo-btn">Add Task</button>
+                <button id="add-todo-btn">+ Add Task</button>
                 <div id="todo-list"></div>
             </div>
             <div id="todo-form-view" class="hide">
@@ -58,8 +64,10 @@
                         </select>
                     </div>
                     <input type="hidden" id="todo-id" name="id">
-                    <button type="button" class="cancel-btn">Cancel</button>
-                    <button type="submit" class="confirm-btn">Submit</button>
+                    <div class="button-container">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="confirm-btn">Submit</button>
+                    </div>
                 </form>
             </div>
         </main>

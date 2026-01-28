@@ -1,3 +1,57 @@
+@font-face {
+  font-family: 'Corben';
+  src: url('./assets/fonts/Corben-Regular.woff') format('woff2'),
+    url('./assets/fonts/Corben-Regular.woff2') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Corben';
+  src: url('./assets/fonts/Corben-Bold.woff2') format('woff2'),
+    url('./assets/fonts/Corben-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('./assets/fonts/SourceSans3-Italic.woff2') format('woff2'),
+    url('./assets/fonts/SourceSans3-Italic.woff') format('woff');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('./assets/fonts/SourceSans3-Regular.woff2') format('woff2'),
+    url('./assets/fonts/SourceSans3-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('./assets/fonts/SourceSans3-BoldItalic.woff2') format('woff2'),
+    url('./assets/fonts/SourceSans3-BoldItalic.woff') format('woff');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('./assets/fonts/SourceSans3-Bold.woff2') format('woff2'),
+    url('./assets/fonts/SourceSans3-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -13,11 +67,21 @@
 }
 
 body {
+  --cream: rgb(241, 234, 223);
+  --pink: #f3cacb;
+  --lime: #ceee54;
+  --purple: #530021;
+  --grey: #734246;
+  --red: #ff8181;
+
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   display: grid;
   place-items: center;
+  background-color: var(--cream);
+  border-radius: 2rem;
+  font-family: 'Source Sans 3', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
 img, picture, video, canvas, svg {
@@ -39,37 +103,84 @@ p {
 
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
-}
-
-nav {
-  padding: 0.5rem 1rem;
-}
-
-.delete-btn {
-  background-color: red;
+  font-family: 'Corben', 'Times New Roman', Times, serif;
+  color: var(--purple);
 }
 
 .app-container {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  min-width: 1000px;
-  min-height: 500px;
+  grid-template-columns: 240px 1fr;
+  width: clamp(600px, 90%, 1200px);
+  min-height: 100vh;
+  border-right: 2px solid var(--pink);
+  overflow: hidden;
 }
 
-main {
-  padding: 0.5rem 1rem;
+nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem 1rem;
+  background-color: var(--pink);
+}
+
+main > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+dialog {
+  background-color: var(--cream);
+  padding: 1.5rem;
+  border: 2px solid var(--pink);
+  border-radius: 0.5rem;
+}
+
+.form-dialog form, .confirmation-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-weight: bold;
+}
+
+.button-container {
+  align-self: flex-end;
 }
 
 #project-list-container {
   display: flex;
   flex-direction: column;
+  gap: 0.2rem;
 }
 
 .project-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
   cursor: pointer;
+}
+
+.project-item:hover {
+  background-color: rgb(from var(--cream) r g b / 0.5);
+  color: var(--purple);
+}
+
+.project-item.selected {
+  background-color: var(--cream);
+  color: var(--purple);
+  font-weight: bold;
 }
 
 .more-icon {
@@ -79,7 +190,7 @@ main {
 }
 
 .more-icon:hover {
-  fill: black;
+  fill: var(--purple);
 }
 
 .dropdown-container {
@@ -89,22 +200,61 @@ main {
 .dropdown-menu {
   position: absolute;
   z-index: 1;
-  width: 6rem;
-  background-color: white;
-  padding: 0.5rem 1rem;
-  box-shadow: 0px 0 0.4rem 0.1rem grey;
+  width: clamp(150px, 12rem, 250px);
+  padding: 0.3rem;
   border-radius: 0.2rem;
+  background-color: var(--cream);
+  box-shadow: 0px 0 0.4rem 0.1rem var(--pink);
+}
+
+.dropdown-menu > div {
+  padding: 0.5rem 1rem;
+}
+
+.dropdown-menu > div:hover {
+  font-weight: bold;
+  border-radius: 0.2rem;
+  background-color: var(--pink);
 }
 
 .todo-item {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
   cursor: pointer;
+}
+
+.todo-item:hover {
+  background-color: var(--pink);
 }
 
 .todo-item-details {
   width: 100%;
+}
+
+.todo-item-details.completed {
+  text-decoration: line-through;
+  color: var(--grey);
+}
+
+button {
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 2rem;
+  font-family: 'Corben', 'Times New Roman', Times, serif;
+  background-color: var(--lime);
+  color: var(--purple);
+  cursor: pointer;
+}
+
+#add-todo-btn {
+  align-self: flex-start;
+}
+
+.delete-btn {
+  background-color: var(--red);
 }
 
 .hide {
