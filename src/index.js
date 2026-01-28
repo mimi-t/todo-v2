@@ -8,17 +8,13 @@ import moreIcon from "./assets/images/dots-horizontal.svg";
 
 const AppController = (() => {
     function startApp() {
-        localStorage.clear();
+        // localStorage.clear();
         if (!localStorage.getItem(PROJECTS)) {
             // set up default Project if it is the user's first time using the app
             util.setObjToLocalStorage(PROJECTS, []);
             const newProject = ProjectInterface.createProject('New Project', []);
             localStorage.setItem(CURRENT_PROJECT, newProject.id);
         }
-        // const projId = localStorage.getItem(CURRENT_PROJECT);
-        // ProjectInterface.addToDoToProject({title: 'clean dishes', description: 'wipe the sink after', dueDate: new Date(), priority: 'high'}, projId);
-        // const newProj = ProjectInterface.createProject('Another one', []);
-        // ProjectInterface.addToDoToProject({title: 'psych homework', description: 'read page 10-22', dueDate: new Date(), priority: 'low'}, newProj.id);
 
         const allProjects = util.getObjFromLocalStorage(PROJECTS);
         const currentProject = ProjectInterface.getProject(localStorage.getItem(CURRENT_PROJECT));
@@ -31,6 +27,7 @@ const AppController = (() => {
         const project = ProjectInterface.getProject(id);
         localStorage.setItem(CURRENT_PROJECT, id);
         DisplayController.populateToDoListView(project);
+        DisplayController.swapToDoView("list");
     }
 
     function addProject(name) {
@@ -129,7 +126,7 @@ const DisplayController = (() => {
             const projectText = document.createElement("p");
             projectText.textContent = project.name;
             const iconImage = document.createElement("svg");
-            iconImage.classList.add("project-more-icon");
+            iconImage.classList.add("more-icon");
             iconImage.innerHTML = moreIcon;
             iconImage.addEventListener("click", e => {
                 e.stopPropagation();
@@ -236,11 +233,12 @@ const DisplayController = (() => {
     function fillForm(formName, formData) {
         const formInputs = document.forms[formName].elements;
         for (const field in formData) {
-            let inputValue = formData[field];
-            if (field.toUpperCase().includes("DATE")) {
-                inputValue = formData[field].slice(0,16);
+            let inputValue = field.toUpperCase().includes("DATE") ? formData[field].slice(0,16) : formData[field];
+            if (formInputs.namedItem(field).type === "checkbox") {
+                formInputs.namedItem(field).checked = inputValue;
+            } else {
+                formInputs.namedItem(field).value = inputValue;
             } 
-            formInputs.namedItem(field).value = inputValue;
         }
     }
 
