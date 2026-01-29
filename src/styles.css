@@ -68,11 +68,12 @@
 
 body {
   --cream: rgb(241, 234, 223);
-  --pink: #f3cacb;
+  --pink: #f3d2ca;
   --lime: #ceee54;
   --purple: #530021;
   --grey: #734246;
   --red: #ff8181;
+  --invalid-red: #e70049;
 
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -91,14 +92,25 @@ img, picture, video, canvas, svg {
 
 input, button, textarea, select {
   font: inherit;
+  background-color: var(--pink);
+  background-color: var(--cream);
+  outline-color: var(--purple);
+  accent-color: var(--purple);
+  border: 2px solid var(--pink);
+  border-radius: 0.2rem;
+  padding: 0.5rem;
+}
+
+input::placeholder {
+  color: var(--grey)
+}
+
+textarea {
+  resize: none;
 }
 
 p, h1, h2, h3, h4, h5, h6 {
   overflow-wrap: break-word;
-}
-
-p {
-  text-wrap: pretty;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -113,7 +125,6 @@ h1, h2, h3, h4, h5, h6 {
   width: clamp(600px, 90%, 1200px);
   min-height: 100vh;
   border-right: 2px solid var(--pink);
-  overflow: hidden;
 }
 
 nav {
@@ -154,6 +165,33 @@ dialog {
   font-weight: bold;
 }
 
+.form-header {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  font-size: 2rem;
+}
+
+.form-header > input[type="checkbox"] {
+  width: clamp(10px, 3rem, 60px);
+}
+
+.form-header > input[type="text"] {
+  flex-grow: 1;
+}
+
+#todo-form-view > form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+input#todo-due-date,
+select#todo-priority {
+  min-width: 15rem;
+  max-width: max-content;
+}
+
 .button-container {
   align-self: flex-end;
 }
@@ -174,27 +212,31 @@ dialog {
 
 .project-item:hover {
   background-color: rgb(from var(--cream) r g b / 0.5);
-  color: var(--purple);
 }
 
 .project-item.selected {
   background-color: var(--cream);
   color: var(--purple);
+}
+
+.project-item.selected > p:first-child {
   font-weight: bold;
 }
 
 .more-icon {
   width: 1.5rem;
   height: 1.5rem;
-  fill: gray;
+  fill: transparent
 }
 
-.more-icon:hover {
+.todo-item:hover .more-icon,
+.project-item:hover .more-icon {
   fill: var(--purple);
 }
 
 .dropdown-container {
   position: relative;
+  color: black;
 }
 
 .dropdown-menu {
@@ -202,7 +244,7 @@ dialog {
   z-index: 1;
   width: clamp(150px, 12rem, 250px);
   padding: 0.3rem;
-  border-radius: 0.2rem;
+  border-radius: 0.3rem;
   background-color: var(--cream);
   box-shadow: 0px 0 0.4rem 0.1rem var(--pink);
 }
@@ -234,7 +276,15 @@ dialog {
   width: 100%;
 }
 
-.todo-item-details.completed {
+.todo-item-title {
+  font-size: 1.15rem;
+}
+
+.overdue .todo-item-date {
+  color: var(--invalid-red);
+}
+
+.todo-item-details.completed p {
   text-decoration: line-through;
   color: var(--grey);
 }

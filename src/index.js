@@ -219,12 +219,18 @@ const DisplayController = (() => {
 
             const toDoTitle = document.createElement("p");
             toDoTitle.textContent = toDo.title;
+            toDoTitle.classList.add("todo-item-title");
             const toDoDate = document.createElement("p");
             toDoDate.textContent = format(toDo.dueDate, "d LLL, p");
+            toDoDate.classList.add("todo-item-date");
             const toDoDetailsDiv = document.createElement("div");
             toDoDetailsDiv.classList.add("todo-item-details");
+
             if (toDo.completed) {
                 toDoDetailsDiv.classList.add("completed");
+            }
+            if (new Date() > new Date(toDo.dueDate)) {
+                toDoDetailsDiv.classList.add("overdue");
             }
             toDoDetailsDiv.append(toDoTitle, toDoDate);
             toDoDetailsDiv.addEventListener("click", e => {
