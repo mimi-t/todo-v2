@@ -176,7 +176,7 @@ dialog {
   width: clamp(10px, 3rem, 60px);
 }
 
-.form-header > input[type="text"] {
+.form-header > input[name="title"] {
   flex-grow: 1;
 }
 

@@ -211,6 +211,7 @@ const DisplayController = (() => {
             const checkboxDiv = document.createElement("div");
             const toDoCheckbox = document.createElement("input");
             toDoCheckbox.setAttribute("type", "checkbox");
+            toDoCheckbox.setAttribute("name", "completed");
             toDoCheckbox.checked = toDo.completed ? true : false;
             toDoCheckbox.addEventListener("change", () => {
                 AppController.toggleToDoComplete(toDo.id);
@@ -328,8 +329,15 @@ const DisplayController = (() => {
         });
 
         // To do task listeners
+        const toDoItemCheckboxes = document.querySelectorAll('.todo-item input[type="checkbox"]');
         const addToDoBtn = document.querySelector("#add-todo-btn");
         const cancelToDoFormBtn = document.querySelector("#todo-form-view .cancel-btn ");
+
+        toDoItemCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", e => {
+                e.target.parentNode.nextSibling.classList.toggle("completed");
+            });
+        });
 
         addToDoBtn.addEventListener("click", () => {
             toDoForm.dataset.mode = "create";
